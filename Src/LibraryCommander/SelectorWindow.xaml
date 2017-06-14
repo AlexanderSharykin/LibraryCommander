@@ -1,0 +1,109 @@
+﻿<Window x:Class="LibraryCommander.SelectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ViewModels;assembly=ViewModels"
+        xmlns:libraryCommander="clr-namespace:LibraryCommander"
+        xmlns:localization="clr-namespace:LibraryCommander.Localization"
+        Title="{Binding Path=Title}"         
+        Background="{StaticResource WinBg}"
+        WindowStartupLocation="CenterScreen"
+        Height="400" Width="360"
+        Loaded="SelectorWindow_OnLoaded">
+    <Window.DataContext>
+        <vm:AttributeSelectorVm/>
+    </Window.DataContext>
+
+    <Window.InputBindings>
+        <KeyBinding Key="F" Modifiers="Control" 
+                                    Command="{Binding Path=SearchCmd, RelativeSource={RelativeSource AncestorType=Window}}"/>
+    </Window.InputBindings>
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="{Binding Path=Add, Source={x:Static localization:Commands.Instance}}" 
+                        Margin="2,4"
+                        Command="{Binding Path=AddItemCmd}" libraryCommander:Cmd.Hotkey="Control+A"/>
+                
+                <Button Content="{Binding Path=Edit, Source={x:Static localization:Commands.Instance}}" 
+                        Margin="2,4"
+                        Command="{Binding Path=EditItemCmd}" libraryCommander:Cmd.Hotkey="Control+E"/>
+                
+                <Button Content="{Binding Path=Del, Source={x:Static localization:Commands.Instance}}" 
+                        Margin="2,4"
+                        Command="{Binding Path=DeleteItemCmd}" libraryCommander:Cmd.Hotkey="Control+D"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
+                <Label Content="{Binding Path=Search, Source={x:Static localization:Commands.Instance}}" 
+                       VerticalAlignment="Center" Foreground="White"/>
+                <TextBox MinWidth="100" Name="TxtSearch" VerticalContentAlignment="Center"
+                         Margin="0,4"
+                         Text="{Binding Path=SearchPattern, Delay=400, UpdateSourceTrigger=PropertyChanged}"/>                
+            </StackPanel>
+        </Grid>
+        
+        <ListBox Grid.Row="1" Name="LstItems"
+                 ItemsSource="{Binding Path=Items}" 
+                 SelectedItem="{Binding Path=SelectedItem}">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=OneWay}"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.Style>
+                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=MultiSelect}" Value="true">
+                            <Setter Property="ItemTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Path=IsSelected}" 
+                                                  Content="{Binding Path=Description}"
+                                                  Style="{StaticResource {x:Type CheckBox}}"
+                                                  HorizontalAlignment="Stretch"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Path=MultiSelect}" Value="false">
+                            <Setter Property="ItemTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <RadioButton IsChecked="{Binding Path=IsSelected}" 
+                                                     Content="{Binding Path=Description}"
+                                                     HorizontalAlignment="Stretch"
+                                                     Style="{StaticResource {x:Type RadioButton}}"
+                                                     GroupName="Single"/>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListBox.Style>
+        </ListBox>
+
+        <UniformGrid Grid.Row="2" HorizontalAlignment="Right" Rows="1">
+            <Button Content="Ok" Margin="2,4"
+                    Command="{Binding Path=SaveCmd, RelativeSource={RelativeSource AncestorType=Window}}"
+                    libraryCommander:Cmd.Hotkey="Control+S"/>
+            <Button Content="{Binding Path=Close, Source={x:Static localization:Commands.Instance}}" 
+                    Margin="2,4"
+                    Command="{Binding Path=CloseCmd, RelativeSource={RelativeSource AncestorType=Window}}"
+                    libraryCommander:Cmd.Hotkey="Escape"/>
+        </UniformGrid>
+    </Grid>
+</Window>

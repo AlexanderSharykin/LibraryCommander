@@ -1,0 +1,381 @@
+﻿<Window x:Class="LibraryCommander.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="clr-namespace:ViewModels;assembly=ViewModels"
+        xmlns:logic="clr-namespace:BusinessLogic;assembly=BusinessLogic"
+        xmlns:fs="clr-namespace:BusinessLogic.Fs;assembly=BusinessLogic"
+        Title="{Binding Path=MainWindow, Source={x:Static localization:Headers.Instance}}" 
+        Background="{StaticResource WinBg}"
+        Width="960" Height="720"         
+        WindowStartupLocation="CenterScreen"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LibraryCommander"
+        xmlns:retroUi="clr-namespace:RetroUI;assembly=RetroUI"
+        xmlns:localization="clr-namespace:LibraryCommander.Localization"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=viewModels:CommanderVm, IsDesignTimeCreatable=false}">
+    
+    <Window.Resources>
+        <DataTemplate x:Key="BookDetails" DataType="fs:VirtualFsItem">
+            <Border ToolTip="{Binding FullPath}">
+            <StackPanel DataContext="{Binding Path=Book}"                         
+                        Margin="40,2,5,2">
+
+                <TextBlock Margin="0,2">
+                    <Run/>
+                    <Run Text="{Binding Path=Category.Name, Mode=OneWay}" Background="Wheat"/>
+                    <Run Text=" [" />
+                    <Run Text="{Binding Path=Language.Name, Mode=OneWay}" />
+                    <Run Text="]" />
+                </TextBlock>
+
+                <ItemsControl ItemsSource="{Binding Path=Tags}" ToolTip="Tags" Margin="0,2">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,0,5,0">                                                            
+                                <Run Text="["/>
+                                <Run Text="{Binding Path=Name, Mode=OneWay}" Background="Khaki"/>
+                                <Run Text="]"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Margin="0,2">
+                    <Run/>
+                    <Run Text="{Binding Path=Cycle.Name, Mode=OneWay}" Background="Wheat"/>
+                    <Run Text=" (" />
+                    <Run Text="{Binding Path=Volume, Mode=OneWay}" />
+                    <Run Text=")" />
+
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=Cycle}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+    
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>                
+        
+        <ListBox Name="LstPartitions"
+                 AlternationCount="{Binding Path=Partitions.Count}"
+                 ItemsSource="{Binding Path=Partitions}"
+                 SelectedItem="{Binding Path=SelectedPartition}"
+                 HorizontalAlignment="Left" 
+                 Margin="4,0" Background="{StaticResource WinBg}"
+                 BorderThickness="0">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="MinWidth" Value="5"/>                    
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <ContentPresenter/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Button MinWidth="30" 
+                            Command="{Binding Path=DataContext.SelectPartitionCmd, ElementName=LstPartitions}"
+                            CommandParameter="{Binding}"
+                            local:Cmd.Hotkey="{Binding Path=Hotkey}"
+                            Margin="0,4,4,4" Padding="2"
+                            BorderThickness="1" BorderBrush="Black">
+                        <Button.Content>
+                            <TextBlock>
+                                <Run Text="{Binding Path=Index, Mode=OneWay}" />
+                                <Run Text="{Binding Path=Name, Mode=OneWay}" />
+                            </TextBlock>
+                        </Button.Content>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <!--<Setter Property="Background" Value="Gainsboro"/>-->
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                                 Value="True">
+                                        <Setter Property="Background" Value="#00a0a0"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <UniformGrid Grid.Row="0" HorizontalAlignment="Right" Rows="1">
+            <Button Content="En" Margin="0,4,4,4" 
+                    Command="{Binding Path=SetCultureCmd}" CommandParameter="en"/>
+            <Button Content="Рус" Margin="4,4,4,4" 
+                    Command="{Binding Path=SetCultureCmd}" CommandParameter="ru-Ru"/>
+        </UniformGrid>
+
+        <ListBox Grid.Row="1" Name="Nav" 
+                 Background="{StaticResource WinBg}"
+                 BorderThickness="0"
+                 ItemsSource="{Binding Path=NavigationPanels}" 
+                 SelectedIndex="{Binding Path=SelectedPanel}"
+                 ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                 ScrollViewer.CanContentScroll="False" 
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <ContentPresenter HorizontalAlignment="Stretch"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <EventSetter Event="PreviewMouseDown" Handler="SelectItemOnContentClick"/>                
+                </Style>
+            </ListBox.ItemContainerStyle>
+            
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!--Folder Content-->
+                        <DataGrid Name="Explorer"
+                                    ItemsSource="{Binding Path=Content}" 
+                                    SelectedItem="{Binding Path=SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                    SelectedIndex="0"
+                                    SelectionUnit="FullRow"
+                                    SelectionMode="Single"                                      
+                                    IsReadOnly="True" AutoGenerateColumns="False" HeadersVisibility="Column">
+                            <DataGrid.Style>
+                                <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+                                    <Setter Property="RowDetailsVisibilityMode" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowItemDetails}" Value="True">
+                                            <Setter Property="RowDetailsVisibilityMode" Value="VisibleWhenSelected"/>
+                                            <Setter Property="RowDetailsTemplate" Value="{StaticResource BookDetails}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Style>
+                                
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+                                    <!--<Setter Property="Background" Value="Transparent"/>-->
+                                    <!--<Setter Property="IsHitTestVisible" Value="False"/>-->
+                                    <Setter Property="local:Attached.IsFocused" Value="{Binding Path=IsSelected, RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
+                                    <Setter Property="BorderThickness" Value="0"/>                                        
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}"/>                                        
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.CellStyle>
+                                
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Width="40" >
+                                    <DataGridTemplateColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <Button Width="30" Content="..."
+                                                    Visibility="{Binding Path=DataContext.CanNavigateToParentFolder,
+                                                                            Converter={StaticResource Bool2Vis}, 
+                                                                            RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    Command="{Binding Path=DataContext.PickItemCmd, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{x:Static fs:FsItem.GotoParent}">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                        <Setter Property="retroUi:Alt.Background" Value="Transparent"/>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.HeaderTemplate>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding Path=FullPath, Converter={StaticResource pico}}" Width="16" Height="16"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="{Binding Path=Name, Source={x:Static localization:Headers.Instance}}" 
+                                                    Binding="{Binding Path=Name}" Width="*"/>
+                                <DataGridTextColumn Header="{Binding Path=Size, Source={x:Static localization:Headers.Instance}}" 
+                                                    Binding="{Binding Path=Size, StringFormat=0.00}"/>
+                            </DataGrid.Columns>
+                                
+
+                            <DataGrid.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick"
+                                            Command="{Binding Path=DataContext.PickItemCmd, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                <KeyBinding Key="Escape"
+                                            Command="{Binding Path=DataContext.PickItemCmd, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{x:Static fs:FsItem.GotoParent}"/>
+                                <KeyBinding Key="Return"
+                                            Command="{Binding Path=DataContext.PickItemCmd, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{x:Static fs:FsItem.GotoParent}"/>
+                                <KeyBinding Key="Enter"
+                                            Command="{Binding Path=DataContext.PickItemCmd, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding Path=SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                <KeyBinding Key="Tab"
+                                            Command="{Binding Path=DataContext.SwitchPanelsCmd, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            </DataGrid.InputBindings>
+                        </DataGrid>                        
+
+                        <!--Path Segments-->
+                        <ItemsControl Grid.Row="1" Margin="0,5,0,0" ItemsSource="{Binding Path=Segments}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Path=Name}" Cursor="Hand">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="TextDecorations" Value="Underline"/>
+                                                            <Setter Property="Background" Value="LightGray"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                            <TextBlock.InputBindings>
+                                                <MouseBinding Gesture="LeftClick" 
+                                                              Command="{Binding Path=DataContext.PickItemCmd, 
+                                                                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                              CommandParameter="{Binding}"/>
+                                            </TextBlock.InputBindings>
+                                        </TextBlock>
+                                        <TextBlock Text="\"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>        
+        </ListBox>
+
+        <Grid Grid.Row="3">
+            <Grid.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Margin" Value="4,0,0,0"></Setter>
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="{Binding Path=Cmd, Source={x:Static localization:Commands.Instance}}" VerticalAlignment="Stretch"/>
+            
+            <UniformGrid Rows="1" Grid.Column="1">
+            
+            <Button Command="{Binding Path=PickCmd}" local:Cmd.Hotkey="F2">
+                <Button.Content>
+                    <TextBlock>
+                    <Run Text="2"/>
+                    <Run Text="{Binding Path=Pick, Source={x:Static localization:Commands.Instance}, Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+                
+            <Button Command="{Binding Path=EditBookCmd}" local:Cmd.Hotkey="F3">
+                <Button.Content>
+                    <TextBlock>
+                        <Run Text="3"/>
+                        <Run Text="{Binding Path=Edit, Source={x:Static localization:Commands.Instance}, Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+
+            <Button Command="{Binding Path=AddBookCmd}" local:Cmd.Hotkey="F4">
+                <Button.Content>
+                    <TextBlock>
+                        <Run Text="4"/>
+                        <Run Text="{Binding Path=Add, Source={x:Static localization:Commands.Instance}, Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+
+            <Button Command="{Binding Path=CopyFileCmd}" local:Cmd.Hotkey="F5">
+                <Button.Content>
+                    <TextBlock>
+                        <Run Text="5"/>
+                        <Run Text="{Binding Path=Copy, Source={x:Static localization:Commands.Instance}, Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+                
+            <Button Command="{Binding Path=MoveFileCmd}" local:Cmd.Hotkey="F6">
+                <Button.Content>
+                    <TextBlock>
+                        <Run Text="6"/>
+                        <Run Text="{Binding Path=Move, Source={x:Static localization:Commands.Instance}, Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.Content>
+            </Button>
+
+                <Button Command="{Binding Path=DeleteBookCmd}" local:Cmd.Hotkey="F8">
+                <Button.Content>
+                        <TextBlock>
+                            <Run Text="8"/>
+                            <Run Text="{Binding Path=Del, Source={x:Static localization:Commands.Instance}, Mode=OneWay}"/>
+                        </TextBlock>
+                </Button.Content>
+            </Button>
+
+            <Button Content="{Binding Path=Search, Source={x:Static localization:Commands.Instance}}" 
+                    Command="{Binding Path=SearchCmd}" local:Cmd.Hotkey="Control+F"/>
+                
+            <Button Content="{Binding Path=Quit, Source={x:Static localization:Commands.Instance}}" 
+                    Click="QuitClick"/>
+            </UniformGrid>
+        </Grid>
+    </Grid>
+</Window>

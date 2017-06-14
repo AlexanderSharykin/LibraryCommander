@@ -1,0 +1,220 @@
+﻿<Window x:Class="LibraryCommander.BookCardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"        
+        xmlns:vm="clr-namespace:ViewModels;assembly=ViewModels"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:libraryCommander="clr-namespace:LibraryCommander"
+        xmlns:localization="clr-namespace:LibraryCommander.Localization"
+        Title="{Binding Path=CardWindow, Source={x:Static localization:Headers.Instance}}" 
+        SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WinBg}"
+        FontSize="14"
+        Height="550" Width="400">
+    
+    <Window.DataContext>
+        <vm:BookCardVm/>
+    </Window.DataContext>
+    
+    <Window.InputBindings>
+        <KeyBinding Key="C" Modifiers="Control" Command="{Binding Path =  CopyTemplateCmd}"/>
+        <KeyBinding Key="V" Modifiers="Control" Command="{Binding Path = PasteTemplateCmd}"/>
+    </Window.InputBindings>
+    
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="AddButton" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Content" Value="+"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=EditMode}" Value="true">
+                    <Setter Property="Content" Value="!"/>                    
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=SearchMode}" Value="true">
+                    <Setter Property="Content" Value="*"/>                    
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style TargetType="Label" x:Key="Hdr" BasedOn="{StaticResource {x:Type Label}}">
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding Path=Background, ElementName=BtnSave}"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+        </Style>
+
+        <Style TargetType="CheckBox" x:Key="Selector" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>            
+        </Style>
+        
+        <Style TargetType="Border" x:Key="Cover">
+            <Setter Property="Padding" Value="8,5"/>            
+            <Setter Property="Background" Value="{Binding Path=Background, ElementName=BtnSave}"/>            
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+
+        <Style TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ErrorMessage}"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="5,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
+            
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>            
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="16"/>
+            <RowDefinition Height="Auto"/>            
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <Label Grid.Row="0" Grid.Column="0" 
+               Style="{StaticResource Hdr}" 
+               Content="{Binding Path=Title, Source={x:Static localization:Headers.Instance}}"/>
+        <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Path=Title, Delay=400, UpdateSourceTrigger=PropertyChanged}"/>        
+
+        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource Cover}" >
+            <CheckBox Style="{StaticResource Selector}" 
+                      Content="{Binding Path=Authors, Source={x:Static localization:Headers.Instance}}" 
+                      IsChecked="{Binding Path=HasAuthorSubcatalog}"
+                      IsHitTestVisible="{Binding Path=CanCreateAuthorSubcatalog}"/>
+        </Border>
+        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding Path=Authors, Mode=OneWay}" IsReadOnly="True"/>
+        <Button Grid.Row="2" Grid.Column="4" Style="{StaticResource AddButton}" 
+                Command="{Binding Path=AddAuthorsCmd}" libraryCommander:Cmd.Hotkey="Control+A"/>
+
+        <Label Grid.Row="4" Grid.Column="0" 
+               Style="{StaticResource Hdr}" 
+               Content="{Binding Path=Category, Source={x:Static localization:Headers.Instance}}"/>
+        <TextBox Grid.Row="4" Grid.Column="2" Text="{Binding Path=CategoryName, Mode=OneWay}" IsReadOnly="True"/>
+        <Button Grid.Row="4" Grid.Column="4" Style="{StaticResource AddButton}" 
+                Command="{Binding Path=AddCategoryCmd}" libraryCommander:Cmd.Hotkey="Control+K"/>
+
+        <Label Grid.Row="6" Grid.Column="0" 
+               Style="{StaticResource Hdr}" 
+               Content="{Binding Path=Tags, Source={x:Static localization:Headers.Instance}}"/>
+        <TextBox Grid.Row="6" Grid.Column="2" Text="{Binding Path=Tags, Mode=OneWay}" IsReadOnly="True"/>
+        <Button Grid.Row="6" Grid.Column="4" Style="{StaticResource AddButton}" 
+                Command="{Binding Path=AddTagsCmd}" libraryCommander:Cmd.Hotkey="Control+T"/>
+
+        
+        <Border Grid.Row="8" Grid.Column="0" Style="{StaticResource Cover}" >
+            <CheckBox Style="{StaticResource Selector}" 
+                      Content="{Binding Path=Cycle, Source={x:Static localization:Headers.Instance}}" 
+                      IsChecked="{Binding Path=HasCycleSubcatalog}"
+                      IsHitTestVisible="{Binding Path=CanCreateCycleSubcatalog}"/>
+        </Border>
+        <TextBox Grid.Row="8" Grid.Column="2" Text="{Binding Path=SelectedCycle.Name, Mode=OneWay}" IsReadOnly="True"/>
+        <Border Grid.Row="8" Grid.Column="2" 
+                Background="Transparent" 
+                Margin="3,0"                
+                HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Image Source="Resources/delete.png" Width="20" Height="20"/>
+            <Border.InputBindings>
+                <MouseBinding MouseAction="LeftClick" Command="{Binding Path=RemoveCycleCmd}"/>
+            </Border.InputBindings>
+        </Border>
+        <Button Grid.Row="8" Grid.Column="4" Style="{StaticResource AddButton}" Command="{Binding Path=AddCycleCmd}"/>
+        
+        <Label Grid.Row="10" Grid.Column="0" 
+               Style="{StaticResource Hdr}" 
+               Content="{Binding Path=Language, Source={x:Static localization:Headers.Instance}}"/>
+        <TextBox Grid.Row="10" Grid.Column="2" Text="{Binding Path=LanguageName, Mode=OneWay}" IsReadOnly="True"/>
+        <Button Grid.Row="10" Grid.Column="4" Style="{StaticResource AddButton}" 
+                Command="{Binding Path=AddLanguageCmd}" libraryCommander:Cmd.Hotkey="Control+L"/>
+
+        <Label Grid.Row="12" Grid.Column="0" 
+               Style="{StaticResource Hdr}" 
+               Content="{Binding Path=Format, Source={x:Static localization:Headers.Instance}}"/>
+        <TextBox Grid.Row="12" Grid.Column="2" Text="{Binding Path=FormatName, Mode=OneWay}" IsReadOnly="True"/>
+        <Button Grid.Row="12" Grid.Column="4" Style="{StaticResource AddButton}" 
+                Command="{Binding Path=AddFormatCmd}" libraryCommander:Cmd.Hotkey="Control+E"/>
+
+        <Border Grid.Row="14" Grid.Column="0" Style="{StaticResource Cover}" >
+            <CheckBox Style="{StaticResource Selector}" 
+                      Content="{Binding Path=Year, Source={x:Static localization:Headers.Instance}}" 
+                      IsChecked="{Binding Path=IsYearKnown}"/>
+        </Border>
+        <xctk:IntegerUpDown Grid.Row="14" Grid.Column="2" IsEnabled="{Binding Path=IsYearKnown}" Value="{Binding Path=Year}"/>        
+
+        <Border Grid.Row="16" Grid.Column="0" Style="{StaticResource Cover}" >
+            <CheckBox Style="{StaticResource Selector}" 
+                      Content="{Binding Path=Volume, Source={x:Static localization:Headers.Instance}}" 
+                      IsChecked="{Binding Path=IsVolumeKnown}"/>
+        </Border>
+        <xctk:ByteUpDown Grid.Row="16" Grid.Column="2" 
+                         IsEnabled="{Binding Path=IsVolumeKnown}"
+                         Minimum="1" Value="{Binding Path=Volume}"/>
+
+        <Label Grid.Row="18" Grid.Column="0" 
+               Style="{StaticResource Hdr}" 
+               Content="{Binding Path=File, Source={x:Static localization:Headers.Instance}}"/>
+        <TextBox Grid.Row="18" Grid.Column="2" IsReadOnly="True" 
+                 Text="{Binding Path=FilePath}"
+                 ToolTip="{Binding Path=Text, RelativeSource={RelativeSource Self}}"/>
+        <Button Grid.Row="18" Grid.Column="4" Style="{StaticResource AddButton}"
+                Command="{Binding Path=OpenFileCmd}" libraryCommander:Cmd.Hotkey="Control+O"/>
+        
+        <Grid Grid.Row="20" Grid.Column="2" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>                        
+            
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Margin="5,0" Name="BtnSave"
+                        Command="{Binding Path=SaveCmd, RelativeSource={RelativeSource AncestorType=Window}}"
+                        libraryCommander:Cmd.Hotkey="Control+S">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource AddButton}">
+                            <Setter Property="Content" Value="{Binding Path=Save, Source={x:Static localization:Commands.Instance}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=EditMode}" Value="true">
+                                    <Setter Property="Content" Value="{Binding Path=Save, Source={x:Static localization:Commands.Instance}}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=SearchMode}" Value="true">
+                                    <Setter Property="Content" Value="{Binding Path=Search, Source={x:Static localization:Commands.Instance}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Content="{Binding Path=Close, Source={x:Static localization:Commands.Instance}}" 
+                        Style="{StaticResource AddButton}"
+                        Command="{Binding Path=CloseCmd, RelativeSource={RelativeSource AncestorType=Window}}"
+                        libraryCommander:Cmd.Hotkey="Escape"/>
+            </StackPanel>
+        </Grid>
+
+    </Grid>
+</Window>

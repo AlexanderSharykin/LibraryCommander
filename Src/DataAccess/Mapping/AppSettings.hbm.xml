@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" auto-import="true" default-access="field.camelcase-underscore">
+  <class name="DataSchema.AppSettings, DataSchema" table="AppSettings" lazy="false">
+    
+    <id name="Id" type="Int32" column="Id" unsaved-value="0">
+      <generator class="native"/>
+    </id>
+    
+    <property name="Culture"          type="String"   column="Culture"/>
+    <property name="FsLocation"       type="String"   column="FsLocation"/>
+    <property name="LibraryLocation"  type="String"   column="LibraryLocation"/>
+
+    <many-to-one name="Category" cascade="none" fetch="join" class="DataSchema.Category"     column="IdCategory"/>
+    <many-to-one name="Language" cascade="none" fetch="join" class="DataSchema.FileLanguage" column="IdLanguage"/>
+    
+    <property name="IdAuthor"    type="Int32"     column="IdAuthor"/>
+    <property name="IdCycle"     type="Int32"     column="IdCycle"/>
+  </class>
+</hibernate-mapping>
