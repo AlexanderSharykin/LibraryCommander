@@ -313,4 +313,16 @@
   <data name="LanguageUsageWarning" xml:space="preserve">
     <value>В библиотеке есть книги на языке [{0}]</value>
   </data>
+  <data name="DbConnectionError" xml:space="preserve">
+    <value>Не удалось подключиться к базе данных.</value>
+  </data>
+  <data name="LogRequest" xml:space="preserve">
+    <value>Создать файл с информацией об ошибке?</value>
+  </data>
+  <data name="SQLiteError" xml:space="preserve">
+    <value>Возможно отсутствует файл Books.db, если приложение было запущено с настройками по умолчанию.</value>
+  </data>
+  <data name="StorageError" xml:space="preserve">
+    <value>Заполните значение поля "library" в конфигурационном файле приложения (расширение .CONFIG). Укажите полный путь к существующему каталогу, который будет использоваться для хранения документов.</value>
+  </data>
 </root>

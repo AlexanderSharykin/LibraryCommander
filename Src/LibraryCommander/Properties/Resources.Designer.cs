@@ -151,6 +151,15 @@ namespace LibraryCommander.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot connect to database..
+        /// </summary>
+        internal static string DbConnectionError {
+            get {
+                return ResourceManager.GetString("DbConnectionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         internal static string Del {
@@ -381,6 +390,15 @@ namespace LibraryCommander.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Create log file?.
+        /// </summary>
+        internal static string LogRequest {
+            get {
+                return ResourceManager.GetString("LogRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Home Library.
         /// </summary>
         internal static string MainWindow {
@@ -404,6 +422,24 @@ namespace LibraryCommander.Properties {
         internal static string NullError {
             get {
                 return ResourceManager.GetString("NullError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If app was launched with default settings, file Books.db is possibly missing..
+        /// </summary>
+        internal static string SQLiteError {
+            get {
+                return ResourceManager.GetString("SQLiteError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change &quot;library&quot; value in application .CONFIG file (should be full path of an existing folder).
+        /// </summary>
+        internal static string StorageError {
+            get {
+                return ResourceManager.GetString("StorageError", resourceCulture);
             }
         }
         

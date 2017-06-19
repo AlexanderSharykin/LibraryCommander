@@ -32,5 +32,10 @@
         string Library { get; }
         string FileNotFound { get; }
         string FolderNotFound { get; }
+
+        string DbConnectionError { get; }
+        string SQLiteError { get; }
+        string StorageError { get; }
+        string LogRequest { get; }
     }
 }

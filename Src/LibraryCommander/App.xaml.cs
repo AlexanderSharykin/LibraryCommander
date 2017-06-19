@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Data;
+using System.Data.SQLite;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using BusinessLogic;
 using BusinessLogic.Fs;
 using DataAccess;
@@ -32,7 +35,54 @@ namespace LibraryCommander
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
+            DispatcherUnhandledException += LogUnhandledDispatcherException;
+            AppDomain.CurrentDomain.UnhandledException += LogUnhandledDomainException;
+            TaskScheduler.UnobservedTaskException += LogTaskSchedulerUnobservedTaskException;
+
+            LocalizationProvider.CurrentCulture = Thread.CurrentThread.CurrentUICulture;
+            BusinessLogic.Localization.Instance = new LocalizationModel();
+            Injector.Localization = new LocalizationVm();
+
+            // Db verification
+            AppSettings settings;
+            try
+            {
+                // trying to get app setting from db
+                settings = new EntityRepository<AppSettings>().Query().FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                var m = new MessageVm { Text = Injector.Localization.DbConnectionError };
+
+                // cannot get data from SQLite db
+                if (ex is SQLiteException || ex.InnerException is SQLiteException)
+                    m.Text += Environment.NewLine + Injector.Localization.SQLiteError;
+                
+                ShowMessage(m);
+                Application.Current.Shutdown();
+                return;
+            }
+
+            // restore last localization from settings
+            if (settings != null && String.IsNullOrWhiteSpace(settings.Culture) == false)
+                LocalizationProvider.CurrentCulture = new CultureInfo(settings.Culture);
+
             string library = ConfigurationManager.AppSettings["library"];
+
+            // Storage verification
+            if (false == Directory.Exists(library))
+            {
+                var m = new MessageVm
+                        {
+                            Text = Injector.Localization.FolderNotFound + Environment.NewLine +
+                                   library + Environment.NewLine +
+                                   Injector.Localization.StorageError
+                        };
+
+                ShowMessage(m);
+                Application.Current.Shutdown();
+                return;
+            }
 
             var args = Environment.GetCommandLineArgs();
             Resources.MergedDictionaries.Clear();
@@ -65,23 +115,13 @@ namespace LibraryCommander
             c.Register(() => new FileFormatManager { Repository = new FileFormatRepository() }); 
             c.Register(() => new BookManager { Repository = new BookRepository() });
 
-            c.Register(() => new SearchNavigator(library) { Repository = new BookRepository() });             
+            c.Register(() => new SearchNavigator(library) { Repository = new BookRepository() });
             c.Register(() => new VirtualFsNavigator(library)
                              {
                                  BookRepository = new BookRepository(),
                                  CategoryRepository = new CategoryRepository()
                              });
             Injector.Container = c;
-            
-            var settings = new EntityRepository<AppSettings>().Query().FirstOrDefault();
-
-            // configurate localization
-            if (settings != null && String.IsNullOrWhiteSpace(settings.Culture) == false)
-                LocalizationProvider.CurrentCulture = new CultureInfo(settings.Culture);
-            else
-                LocalizationProvider.CurrentCulture = Thread.CurrentThread.CurrentUICulture;
-            BusinessLogic.Localization.Instance = new LocalizationModel();
-            Injector.Localization = new LocalizationVm();            
 
             StorageManager.StoragePath = library;
             UsageValidator.Repository = new BookRepository();
@@ -107,6 +147,10 @@ namespace LibraryCommander
 
         private void App_OnExit(object sender, ExitEventArgs e)
         {
+            // app initialization was not completed. quit without changing settings
+            if (_commander == null)
+                return;
+
             // save app setting on Exit
             var rep = new EntityRepository<AppSettings>();
             var settings = rep.Query().FirstOrDefault() ?? new AppSettings();
@@ -123,6 +167,59 @@ namespace LibraryCommander
             settings.IdCycle = c.IdCycle;
 
             rep.SaveOrUpdate(settings);
+        }
+
+        private void ShowMessage(MessageVm m)
+        {
+            new WpfMessageBox().ShowDialog(m);
+        }
+
+        private void ShowExceptionMessage(Exception ex, string source)
+        {
+            var m = new MessageVm
+                    {
+                        Text = ex.Message + Environment.NewLine + Injector.Localization.LogRequest,
+                        Yes = true,
+                        No = true,
+                    };
+
+            // request to create log file
+            new WpfMessageBox().ShowDialog(m);
+
+            if (m.DialogResult.ToString() != "Yes")
+                return;
+
+            try
+            {
+                File.WriteAllLines("Log " + DateTime.Now.ToString("dd-mm-yy hh-MM-ss") + ".txt",
+                    new[]
+                    {
+                        source,
+                        ex.GetType().FullName,
+                        ex.Message,
+                        ex.StackTrace
+                    });
+            }
+            catch
+            {
+                // log write failed
+            }
+        }
+
+        private void LogTaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs arg)
+        {
+            ShowExceptionMessage(arg.Exception, "TaskScheduler.UnobservedTaskException");
+        }
+
+        private void LogUnhandledDomainException(object sender, UnhandledExceptionEventArgs arg)
+        {
+            ShowExceptionMessage(arg.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException: " + String.Format("IsTerminating = {0}", arg.IsTerminating));
+        }
+
+        private void LogUnhandledDispatcherException(object sender, DispatcherUnhandledExceptionEventArgs arg)
+        {
+            ShowExceptionMessage(arg.Exception, "DispatcherUnhandledException");
+            arg.Handled = true;
         }
     }
 }

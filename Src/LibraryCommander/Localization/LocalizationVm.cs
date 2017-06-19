@@ -40,5 +40,10 @@ namespace LibraryCommander.Localization
 
         public string FileNotFound { get { return GetResource(); } }
         public string FolderNotFound { get { return GetResource(); } }
+
+        public string DbConnectionError { get { return GetResource(); } }
+        public string SQLiteError { get { return GetResource(); } }
+        public string StorageError { get { return GetResource(); } }
+        public string LogRequest { get { return GetResource(); } }
     }
 }

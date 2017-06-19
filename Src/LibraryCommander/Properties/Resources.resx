@@ -247,4 +247,16 @@
   <data name="LanguageUsageWarning" xml:space="preserve">
     <value>Library contains book(s) in language [{0}]</value>
   </data>
+  <data name="DbConnectionError" xml:space="preserve">
+    <value>Cannot connect to database.</value>
+  </data>
+  <data name="LogRequest" xml:space="preserve">
+    <value>Create log file?</value>
+  </data>
+  <data name="SQLiteError" xml:space="preserve">
+    <value>If app was launched with default settings, file Books.db is possibly missing.</value>
+  </data>
+  <data name="StorageError" xml:space="preserve">
+    <value>Change "library" value in application .CONFIG file (should be full path of an existing folder)</value>
+  </data>
 </root>
